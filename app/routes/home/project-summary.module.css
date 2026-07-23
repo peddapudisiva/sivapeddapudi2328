@@ -24,10 +24,12 @@
   }
 
   &[data-first='true'] {
-    margin-top: var(--space2XL);
+    margin-top: 140px;
+    padding-top: 40px;
 
     @media (--mediaTablet) {
-      margin-top: var(--spaceXL);
+      margin-top: 80px;
+      padding-top: 20px;
     }
   }
 }

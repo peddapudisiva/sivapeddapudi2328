@@ -1,16 +1,21 @@
 .intro {
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
+  padding-top: 140px;
+  padding-bottom: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  position: relative;
 }
 
 .text {
   max-width: 1024px;
   width: 100%;
   position: relative;
-  top: calc(var(--spaceL) * -1);
+  top: 0;
+  z-index: 2;
 
   @media (--mediaDesktop) {
     max-width: 920px;
