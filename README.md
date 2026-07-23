@@ -19,8 +19,7 @@
 </p>
 
 <p align="center">
-  🌐 <b>GitHub Pages Live Site</b>: <a href="https://peddapudisiva.github.io/sivapeddapudi2328/">https://peddapudisiva.github.io/sivapeddapudi2328/</a><br>
-  ⚡ <b>Surge Live Mirror</b>: <a href="https://sivapeddapudi2328.surge.sh">https://sivapeddapudi2328.surge.sh</a>
+  🚀 <b>Live Portfolio</b>: <a href="https://sivapeddapudi2328.vercel.app">https://sivapeddapudi2328.vercel.app</a>
 </p>
 
 ---
