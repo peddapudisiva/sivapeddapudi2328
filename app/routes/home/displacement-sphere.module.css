@@ -11,3 +11,24 @@
     opacity: 1;
   }
 }
+
+/* Static gradient shown in place of the 3D sphere when WebGL is unavailable
+   (e.g. GPU under heavy load from other tabs/apps), so the hero never falls
+   back to a blank background */
+.fallback {
+  position: absolute;
+  width: 100vw;
+  inset: 0;
+  opacity: 0;
+  animation: fallbackFadeIn 3s var(--bezierFastoutSlowin) forwards;
+  background:
+    radial-gradient(circle at 80% 30%, color-mix(in lab, var(--accent) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(circle at 95% 5%, color-mix(in lab, var(--accent) 16%, transparent) 0%, transparent 65%),
+    radial-gradient(circle at 60% 75%, color-mix(in lab, var(--accent) 10%, transparent) 0%, transparent 55%);
+}
+
+@keyframes fallbackFadeIn {
+  to {
+    opacity: 1;
+  }
+}

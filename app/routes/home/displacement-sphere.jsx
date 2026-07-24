@@ -2,7 +2,7 @@ import { useTheme } from '~/components/theme-provider';
 import { Transition } from '~/components/transition';
 import { useReducedMotion, useSpring } from 'framer-motion';
 import { useInViewport, useWindowSize } from '~/hooks';
-import { startTransition, useEffect, useRef } from 'react';
+import { startTransition, useEffect, useRef, useState } from 'react';
 import {
   AmbientLight,
   DirectionalLight,
@@ -47,6 +47,7 @@ export const DisplacementSphere = props => {
   const windowSize = useWindowSize();
   const rotationX = useSpring(0, springConfig);
   const rotationY = useSpring(0, springConfig);
+  const [webglFailed, setWebglFailed] = useState(false);
 
   useEffect(() => {
     const { innerWidth, innerHeight } = window;
@@ -60,9 +61,11 @@ export const DisplacementSphere = props => {
         powerPreference: 'high-performance',
       });
     } catch (error) {
-      // Fall back to no sphere rather than crashing the page when WebGL
-      // is unavailable or the GPU is under heavy load from other tabs/apps
-      console.warn('DisplacementSphere: WebGL unavailable, skipping render', error);
+      // Fall back to a static gradient rather than crashing the page (or
+      // leaving a blank background) when WebGL is unavailable or the GPU
+      // is under heavy load from other tabs/apps
+      console.warn('DisplacementSphere: WebGL unavailable, using fallback background', error);
+      setWebglFailed(true);
       return;
     }
 
@@ -195,6 +198,10 @@ export const DisplacementSphere = props => {
       cancelAnimationFrame(animation);
     };
   }, [isInViewport, reduceMotion, rotationX, rotationY]);
+
+  if (webglFailed) {
+    return <div aria-hidden className={styles.fallback} {...props} />;
+  }
 
   return (
     <Transition in timeout={3000} nodeRef={canvasRef}>
