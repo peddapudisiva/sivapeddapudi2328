@@ -199,21 +199,26 @@ export const DisplacementSphere = props => {
     };
   }, [isInViewport, reduceMotion, rotationX, rotationY]);
 
-  if (webglFailed) {
-    return <div aria-hidden className={styles.fallback} {...props} />;
-  }
-
   return (
-    <Transition in timeout={3000} nodeRef={canvasRef}>
-      {({ visible, nodeRef }) => (
-        <canvas
-          aria-hidden
-          className={styles.canvas}
-          data-visible={visible}
-          ref={nodeRef}
-          {...props}
-        />
+    <>
+      {/* Persistent gradient layer behind the canvas. The canvas is drawn with
+          alpha, so this shows through wherever the sphere isn't (and entirely
+          if WebGL fails or renders nothing), guaranteeing the hero is never a
+          plain black background even under heavy GPU load. */}
+      <div aria-hidden className={styles.fallback} />
+      {!webglFailed && (
+        <Transition in timeout={3000} nodeRef={canvasRef}>
+          {({ visible, nodeRef }) => (
+            <canvas
+              aria-hidden
+              className={styles.canvas}
+              data-visible={visible}
+              ref={nodeRef}
+              {...props}
+            />
+          )}
+        </Transition>
       )}
-    </Transition>
+    </>
   );
 };
