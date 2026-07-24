@@ -11,7 +11,7 @@ import { useWindowSize } from '~/hooks';
 import { Suspense, lazy, useState } from 'react';
 import { cssProps, media } from '~/utils/style';
 import { useHydrated } from '~/hooks/useHydrated';
-import katakana from './katakana.svg';
+import katakana from './katakana.svg?url';
 import styles from './project-summary.module.css';
 
 const Model = lazy(() =>

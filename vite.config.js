@@ -14,7 +14,9 @@ import { vercelPreset } from '@vercel/remix/vite';
 export default defineConfig({
   assetsInclude: ['**/*.glb', '**/*.hdr', '**/*.glsl'],
   build: {
-    assetsInlineLimit: 1024,
+    // katakana.svg is referenced via <use href="...#id">, which breaks if Vite
+    // inlines it as a data: URI (Chrome blocks cross-origin <use> references)
+    assetsInlineLimit: 0,
   },
   server: {
     port: 7777,

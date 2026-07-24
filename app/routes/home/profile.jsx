@@ -12,7 +12,7 @@ import { Text } from '~/components/text';
 import { Transition } from '~/components/transition';
 import { Fragment, useState } from 'react';
 import { media } from '~/utils/style';
-import katakana from './katakana.svg';
+import katakana from './katakana.svg?url';
 import styles from './profile.module.css';
 
 const ProfileText = ({ visible, titleId }) => (

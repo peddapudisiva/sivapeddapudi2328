@@ -34,6 +34,10 @@ export function AIChat() {
     { sender: 'bot', text: 'Hi! I am Siva’s AI Assistant. Ask me anything about Siva’s projects, internships, skills, or certifications!' },
   ]);
   const [input, setInput] = useState('');
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, posX: 0, posY: 0, baseLeft: 0, baseTop: 0, hasDragged: false });
+  const containerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -43,6 +47,106 @@ export function AIChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
+
+  // Keep the widget inside the viewport whenever it resizes (rotation, resize, etc.)
+  useEffect(() => {
+    const clampToViewport = () => {
+      const node = containerRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      const baseLeft = rect.left - position.x;
+      const baseTop = rect.top - position.y;
+      const minX = -baseLeft;
+      const maxX = window.innerWidth - rect.width - baseLeft;
+      const minY = -baseTop;
+      const maxY = window.innerHeight - rect.height - baseTop;
+
+      setPosition(prev => ({
+        x: Math.min(Math.max(prev.x, minX), Math.max(minX, maxX)),
+        y: Math.min(Math.max(prev.y, minY), Math.max(minY, maxY)),
+      }));
+    };
+
+    window.addEventListener('resize', clampToViewport);
+    return () => window.removeEventListener('resize', clampToViewport);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Touch and Mouse dragging logic
+  const handlePointerDown = (e) => {
+    // Only left click or touch
+    if (e.button !== undefined && e.button !== 0) return;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rect = containerRef.current.getBoundingClientRect();
+
+    dragRef.current = {
+      startX: clientX,
+      startY: clientY,
+      posX: position.x,
+      posY: position.y,
+      // Position the transform would need to be at to sit at viewport (0, 0)
+      baseLeft: rect.left - position.x,
+      baseTop: rect.top - position.y,
+      rectWidth: rect.width,
+      rectHeight: rect.height,
+      hasDragged: false,
+    };
+
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    const handlePointerMove = (e) => {
+      if (!isDragging) return;
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const deltaX = clientX - dragRef.current.startX;
+      const deltaY = clientY - dragRef.current.startY;
+
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+        dragRef.current.hasDragged = true;
+      }
+
+      const { baseLeft, baseTop, rectWidth, rectHeight } = dragRef.current;
+      const minX = -baseLeft;
+      const maxX = window.innerWidth - rectWidth - baseLeft;
+      const minY = -baseTop;
+      const maxY = window.innerHeight - rectHeight - baseTop;
+
+      setPosition({
+        x: Math.min(Math.max(dragRef.current.posX + deltaX, minX), Math.max(minX, maxX)),
+        y: Math.min(Math.max(dragRef.current.posY + deltaY, minY), Math.max(minY, maxY)),
+      });
+    };
+
+    const handlePointerUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handlePointerMove);
+      window.addEventListener('mouseup', handlePointerUp);
+      window.addEventListener('touchmove', handlePointerMove, { passive: false });
+      window.addEventListener('touchend', handlePointerUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handlePointerMove);
+      window.removeEventListener('mouseup', handlePointerUp);
+      window.removeEventListener('touchmove', handlePointerMove);
+      window.removeEventListener('touchend', handlePointerUp);
+    };
+  }, [isDragging]);
+
+  const handleToggle = () => {
+    if (!dragRef.current.hasDragged) {
+      setIsOpen((prev) => !prev);
+    }
+  };
 
   const handleSend = (userText) => {
     const textToSend = userText || input;
@@ -69,19 +173,43 @@ export function AIChat() {
   };
 
   return (
-    <div className={styles.container}>
-      <button className={styles.toggleButton} onClick={() => setIsOpen(!isOpen)} title="Ask Siva AI">
+    <div
+      ref={containerRef}
+      className={styles.container}
+      style={{
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        touchAction: 'none',
+      }}
+    >
+      <button
+        className={styles.toggleButton}
+        onMouseDown={handlePointerDown}
+        onTouchStart={handlePointerDown}
+        onClick={handleToggle}
+        title="Ask Siva AI (Drag to move)"
+      >
         {isOpen ? '✕' : '🤖'}
       </button>
 
       {isOpen && (
         <div className={styles.chatWindow}>
-          <div className={styles.header}>
+          <div
+            className={styles.header}
+            onMouseDown={handlePointerDown}
+            onTouchStart={handlePointerDown}
+            style={{ cursor: 'grab' }}
+          >
             <div className={styles.headerTitle}>
               <span>🤖</span>
               <span>Ask Siva AI Assistant</span>
             </div>
-            <button className={styles.closeButton} onClick={() => setIsOpen(false)}>
+            <button
+              className={styles.closeButton}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(false);
+              }}
+            >
               ✕
             </button>
           </div>
